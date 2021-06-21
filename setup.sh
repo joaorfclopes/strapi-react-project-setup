@@ -101,7 +101,7 @@ function create_frontend() {
     cd ..
 }
 
-function bye() {
+function run() {
     echo ''
     echo 'Project created with success!'
     echo ''
@@ -119,7 +119,7 @@ function setup() {
     project_init
     create_backend
     create_frontend
-    bye
+    run
 }
 
 setup
