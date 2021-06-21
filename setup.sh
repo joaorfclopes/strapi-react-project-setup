@@ -30,7 +30,7 @@ function create_dir() {
     if [ -z "$dir_name" ]; then
         error_on_read create_dir
     else
-        mkdir $dir_name
+        cd .. && mkdir $dir_name
         echo "Directory $dir_name created!"
         echo ''
     fi
@@ -72,7 +72,7 @@ function replace_packagejson() {
 function project_init() {
     create_dir
     echo 'Initiating npm & git project...'
-    cp -R jq_scripts $dir_name
+    cp -R strapi-react-project-setup/jq_scripts $dir_name
     echo "Scripts copied to $dir_name!"
     cd $dir_name
     echo ''
@@ -101,13 +101,12 @@ function create_frontend() {
     cd ..
 }
 
-function mv_dir() {
-    find . -maxdepth 1 -exec mv {} .. \;
-}
-
-function run() {
+function bye() {
     echo ''
     echo 'Project created with success!'
+    echo ''
+    cd ../$dir_name
+    echo "Project location: ${PWD}"
     echo ''
     echo 'Opening project...'
     echo ''
@@ -120,8 +119,7 @@ function setup() {
     project_init
     create_backend
     create_frontend
-    #mv_dir
-    run
+    bye
 }
 
 setup
