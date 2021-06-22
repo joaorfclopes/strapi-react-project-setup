@@ -37,35 +37,13 @@ function create_dir() {
 }
 
 function read_repository_url() {
-    npm install node-jq concurrently --save
     read -p 'Repository URL: ' repository_url
     if [ -z "$repository_url" ]; then
         error_on_read read_repository_url
     else
-        replace_packagejson
+        git remote add origin $repository_url
+        node jq_scripts/jq_general.js $repository_url
     fi
-}
-
-function read_heroku_backend() {
-    read -p 'Heroku Backend URL: ' heroku_backend
-    if [ -z "$heroku_backend" ]; then
-        error_on_read read_heroku_backend
-    else
-        replace_packagejson
-    fi
-}
-
-function read_heroku_frontend() {
-    read -p 'Heroku Frontend URL: ' heroku_frontend
-    if [ -z "$heroku_frontend" ]; then
-        error_on_read read_heroku_frontend
-    else
-        replace_packagejson
-    fi
-}
-
-function replace_packagejson() {
-    node ./jq_scripts/jq_general.js $repository_url $heroku_backend $heroku_frontend
 }
 
 function project_init() {
@@ -76,42 +54,78 @@ function project_init() {
     cd $dir_name
     echo ''
     npm init -y
+    echo 'Installing packages...'
+    npm install node-jq concurrently --save
+    echo ''
     git init
     printf '%s\n' 'node_modules' 'package-lock.json' '.DS_Store' 'jq_scripts' >>.gitignore
     echo ''
     read_repository_url
-    npm run setup-remotes
+    heroku_login
 }
 
-function setup_backend_for_deploy() {
-    echo 'Setting up backend...'
+function heroku_login() {
+    command -v heroku >/dev/null 2>&1 || {
+        echo >&2 "Heroku must be installed. Installing via NPM..."
+        npm install -g heroku
+    }
+    echo 'Loggin in Heroku'
+    heroku login
     echo ''
+}
+
+function setup_heroku_backend() {
+    echo 'Setting up heroku backend...'
+    echo ''
+    backend_name="$dir_name-$USER-backend"
+    heroku create $backend_name
     heroku addons:create heroku-postgresql:hobby-dev
     heroku config
-    npm install pg-connection-string pg --save
-    mkdir -p ./config/env/production
     heroku config:set NODE_ENV=production
     heroku config:set MY_HEROKU_URL=$(heroku info -s | grep web_url | cut -d= -f2)
+    git remote remove heroku
+    heroku git:remote -a $backend_name -r heroku-backend
     echo ''
-    echo 'Backend is ready for deploy!'
+    echo 'Heroku backend setup done!'
+    echo ''
+}
+
+function setup_backend_deploy() {
+    echo 'Setting up backend for deploy...'
+    echo ''
+    npm install pg-connection-string pg --save
+    mkdir -p ./config/env/production
+    echo ''
+    echo 'Backend ready for deploy!'
     echo ''
 }
 
 function create_backend() {
-    read_heroku_backend
+    setup_heroku_backend
     npx create-strapi-app backend --quickstart &
     sleep 10 && cd backend && node ../jq_scripts/jq_backend_before.js
     wait
+    setup_backend_deploy
     printf '%s\n' 'package-lock.json' >>.gitignore
     echo '.gitignore updated!'
     echo ''
-    setup_backend_for_deploy
     node ../jq_scripts/jq_backend_after.js
     cd ..
 }
 
+function setup_heroku_frontend() {
+    echo 'Setting up frontend...'
+    echo ''
+    frontend_name="$dir_name-$USER-frontend"
+    heroku create $frontend_name
+    git remote remove heroku
+    heroku git:remote -a $frontend_name -r heroku-frontend
+    echo ''
+    echo 'Frontend is ready for deploy!'
+}
+
 function create_frontend() {
-    read_heroku_frontend
+    setup_heroku_frontend
     npx create-react-app frontend
     cd frontend && node ../jq_scripts/jq_frontend.js
     echo 'Frontend Created!'
@@ -120,7 +134,7 @@ function create_frontend() {
 
 function push_project() {
     cd ../$dir_name
-    rm -rf jq_scripts
+    rm -rf ./jq_scripts
     npm run commit-origin
 }
 
