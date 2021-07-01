@@ -79,6 +79,7 @@ function setup_heroku_backend() {
     echo ''
     backend_name="$dir_name-$USER-backend"
     heroku create $backend_name
+    heroku pipelines:create $dir_name -a $backend_name -s production
     heroku addons:create heroku-postgresql:hobby-dev
     heroku config
     heroku config:set NODE_ENV=production
@@ -103,7 +104,7 @@ function setup_backend_deploy() {
 function create_backend() {
     setup_heroku_backend
     npx create-strapi-app backend --quickstart &
-    sleep 10 && cd backend && node ../jq_scripts/jq_backend_before.js
+    sleep 60 && cd backend && node ../jq_scripts/jq_backend_before.js
     wait
     setup_backend_deploy
     printf '%s\n' 'package-lock.json' >>.gitignore
@@ -118,6 +119,7 @@ function setup_heroku_frontend() {
     echo ''
     frontend_name="$dir_name-$USER-frontend"
     heroku create $frontend_name
+    heroku pipelines:add $dir_name -a $frontend_name -s production
     git remote remove heroku
     heroku git:remote -a $frontend_name -r heroku-frontend
     echo ''
