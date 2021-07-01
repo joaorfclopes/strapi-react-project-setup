@@ -7,7 +7,7 @@ function welcome() {
 
 function check_node() {
     lowest_version="10.16.0"
-    highest_version="14.0.0"
+    highest_version="15.0.0"
     if-node-version "<$lowest_version" && echo "Node Version must be at least $lowest_version" && echo '' && exit 1
     if-node-version ">$highest_version" && echo "Node Version can't be higher than $highest_version" && echo '' && exit 1
 }
