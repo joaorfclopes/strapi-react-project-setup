@@ -14,7 +14,6 @@ function check_node() {
 
 function node_version() {
     echo 'Installing dependencies...'
-    echo ''
     npm install --save if-node-version
     echo 'Checking node version...'
     node -v
@@ -53,6 +52,7 @@ function project_init() {
     create_dir
     echo 'Initiating npm & git project...'
     cp -R strapi-react-project-setup/jq_scripts $dir_name
+    cp -R strapi-react-project-setup/backend_config $dir_name
     echo "Scripts copied to $dir_name!"
     cd $dir_name
     echo ''
@@ -100,6 +100,13 @@ function setup_backend_deploy() {
     npm install pg-connection-string pg --save
     mkdir -p ./config/env/production
     echo ''
+    echo 'Copying config files to backend...'
+    pwd
+    cp ../backend_config/database.js ./config/env/production
+    cp ../backend_config/server.js ./config/env/production
+    echo ''
+    echo 'Config files copied!'
+    echo ''
     echo 'Backend ready for deploy!'
     echo ''
 }
@@ -137,10 +144,14 @@ function create_frontend() {
     cd ..
 }
 
-function push_project() {
+function finish_project() {
     cd ../$dir_name
     rm -rf ./jq_scripts
-    npm run commit-origin
+    rm -rf ./backend_config
+}
+
+function push_project() {
+    npm run commit-origin && echo 'Commit succeeded' || echo 'Commit failed'
 }
 
 function run() {
@@ -160,6 +171,7 @@ function setup() {
     project_init
     create_backend
     create_frontend
+    finish_project
     push_project
     run
 }
