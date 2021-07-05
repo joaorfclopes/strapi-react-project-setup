@@ -3,6 +3,7 @@
 function welcome() {
     echo 'Welcome to Strapi & React project setup!'
     echo ''
+    user=$(whoami)
 }
 
 function check_node() {
@@ -64,23 +65,39 @@ function project_init() {
     printf '%s\n' 'node_modules' 'package-lock.json' '.DS_Store' 'jq_scripts' >>.gitignore
     echo ''
     read_repository_url
-    heroku_login
+    start_heroku
 }
 
-function heroku_login() {
+function check_heroku() {
+    if [ $? -eq 0 ]; then
+        echo ''
+        echo OK
+        echo ''
+    else
+        heroku_login
+    fi
+}
+
+function start_heroku() {
     command -v heroku >/dev/null 2>&1 || {
         echo >&2 "Heroku must be installed. Installing via NPM..."
         npm install -g heroku
     }
-    echo 'Loggin in Heroku'
-    heroku login
+    heroku whoami
+    check_heroku
+}
+
+function heroku_login() {
     echo ''
+    echo 'Please login in Heroku'
+    heroku login -i
+    check_heroku
 }
 
 function setup_heroku_backend() {
     echo 'Setting up heroku backend...'
     echo ''
-    backend_name="$dir_name-$USER-backend"
+    backend_name="$dir_name-$user-backend"
     heroku create $backend_name
     heroku pipelines:create $dir_name -a $backend_name -s production
     heroku addons:create heroku-postgresql:hobby-dev
@@ -121,13 +138,18 @@ function create_backend() {
     echo '.gitignore updated!'
     echo ''
     node ../jq_scripts/jq_backend_after.js
+    command -v yarn >/dev/null 2>&1 || {
+        echo >&2 "Yarn must be installed. Installing via NPM..."
+        npm install --global yarn
+    }
+    yarn install
     cd ..
 }
 
 function setup_heroku_frontend() {
     echo 'Setting up frontend...'
     echo ''
-    frontend_name="$dir_name-$USER-frontend"
+    frontend_name="$dir_name-$user-frontend"
     heroku create $frontend_name
     heroku pipelines:add $dir_name -a $frontend_name -s production
     git remote remove heroku
@@ -151,6 +173,12 @@ function push_project() {
     npm run commit-origin && echo 'Commit succeeded' || echo 'Commit failed'
 }
 
+function deploy_project() {
+    echo ''
+    echo 'Deploying project...'
+    npm run full-deploy && echo 'Deploy completed with success!' || echo 'Deploy failed!'
+}
+
 function finish() {
     echo ''
     echo 'Project created with success!'
@@ -169,6 +197,7 @@ function setup() {
     create_backend
     create_frontend
     push_project
+    deploy_project
     finish
 }
 
