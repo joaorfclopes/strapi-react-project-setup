@@ -144,25 +144,22 @@ function create_frontend() {
     cd ..
 }
 
-function finish_project() {
+function push_project() {
     cd ../$dir_name
     rm -rf ./jq_scripts
     rm -rf ./backend_config
-}
-
-function push_project() {
     npm run commit-origin && echo 'Commit succeeded' || echo 'Commit failed'
 }
 
-function run() {
+function finish() {
     echo ''
     echo 'Project created with success!'
     echo ''
     echo "Project location: ${PWD}"
     echo ''
-    echo 'Opening project...'
+    echo 'Thank you for using Strapi & React project setup!'
     echo ''
-    npm run dev
+    echo 'Bye! :)'
 }
 
 function setup() {
@@ -171,9 +168,8 @@ function setup() {
     project_init
     create_backend
     create_frontend
-    finish_project
     push_project
-    run
+    finish
 }
 
 setup
