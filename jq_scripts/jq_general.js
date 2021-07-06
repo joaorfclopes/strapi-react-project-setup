@@ -10,7 +10,7 @@ const filter = `.scripts={
     "push-backend": "git subtree push --prefix backend heroku-backend master",
     "deploy-backend": "npm run build-backend && npm run commit-backend && npm run push-backend",
     "update-frontend": "cd frontend && npm install",
-    "dev-frontend": "cd frontend && npm run start",
+    "dev-frontend": "cd frontend && npm run dev",
     "prod-frontend": "cd frontend && npm run prod",
     "build-frontend": "cd frontend && npm run build",
     "commit-frontend": "cd frontend && git add . && git commit --allow-empty -m \'frontend deploy\' && git push origin master",

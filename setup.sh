@@ -54,6 +54,7 @@ function project_init() {
     echo 'Initiating npm & git project...'
     cp -R strapi-react-project-setup/jq_scripts $dir_name
     cp -R strapi-react-project-setup/backend_config $dir_name
+    cp -R strapi-react-project-setup/frontend_config $dir_name
     echo "Scripts copied to $dir_name!"
     cd $dir_name
     echo ''
@@ -158,10 +159,18 @@ function setup_heroku_frontend() {
     echo 'Frontend is ready for deploy!'
 }
 
+function setup_frontend_deploy() {
+    cp ../frontend_config/app.js ./
+}
+
 function create_frontend() {
     setup_heroku_frontend
     npx create-react-app frontend
     cd frontend && node ../jq_scripts/jq_frontend.js
+    setup_frontend_deploy
+    npm install express http-server --save
+    yarn install
+    setup_frontend_deploy
     echo 'Frontend Created!'
     cd ..
 }
