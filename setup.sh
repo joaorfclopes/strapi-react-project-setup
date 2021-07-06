@@ -179,6 +179,7 @@ function push_project() {
     cd ../$dir_name
     rm -rf ./jq_scripts
     rm -rf ./backend_config
+    rm -rf ./frontend_config
     npm run commit-origin && echo 'Commit succeeded' || echo 'Commit failed'
 }
 
