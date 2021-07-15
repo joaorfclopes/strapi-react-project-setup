@@ -1,7 +1,7 @@
 const jq = require('node-jq');
 const fs = require('fs');
 
-const filter = `.scripts.develop="strapi develop"`;
+const filter = `.scripts.develop="strapi develop --watch-admin"`;
 const jsonPath = `${process.cwd()}/package.json`;
 
 jq.run(filter, jsonPath).then((result) => fs.writeFile(jsonPath, result, function (err) {

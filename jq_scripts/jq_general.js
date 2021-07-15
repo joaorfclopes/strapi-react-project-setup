@@ -3,7 +3,7 @@ const fs = require('fs');
 
 const filter = `.scripts={
     "update-backend": "cd backend && npm install",
-    "dev-backend": "cd backend && npm run develop --watch-admin",
+    "dev-backend": "cd backend && npm run develop",
     "prod-backend": "cd backend && npm run start",
     "build-backend": "cd backend && npm run build",
     "commit-backend": "cd backend && git add . && git commit --allow-empty -m \'backend deploy\' && git push origin master",
