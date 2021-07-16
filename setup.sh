@@ -155,12 +155,16 @@ function setup_heroku_frontend() {
     heroku pipelines:add $dir_name -a $frontend_name -s production
     git remote remove heroku
     heroku git:remote -a $frontend_name -r heroku-frontend
+    backend_url="https://$backend_name.herokuapp.com"
+    heroku config:set REACT_APP_API_URL=$backend_url --remote heroku-frontend
     echo ''
     echo 'Frontend is ready for deploy!'
 }
 
 function setup_frontend_deploy() {
     cp ../frontend_config/app.js ./
+    cp ../frontend_config/.env ./
+    rm -rf src && cp -R ../frontend_config/src ./
 }
 
 function create_frontend() {
@@ -168,6 +172,8 @@ function create_frontend() {
     npx create-react-app frontend
     cd frontend && node ../jq_scripts/jq_frontend.js
     setup_frontend_deploy
+    printf '%s\n' 'package-lock.json' '.env' >>.gitignore
+    echo '.gitignore updated!'
     npm install express http-server --save
     yarn install
     setup_frontend_deploy
